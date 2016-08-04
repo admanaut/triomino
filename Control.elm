@@ -1,6 +1,8 @@
 module Control exposing (..)
 
 import Grid exposing (..)
+import Grid
+
 import Triomino exposing (..)
 import Array
 
@@ -12,17 +14,16 @@ options = [ straight, line, tright, tleft, lright, lleft ]
 
 solve' : Grid -> Options -> List Triomino -> List Triomino
 solve' gr opts choices =
-    if full gr then
+    if Grid.full gr then
         -- remember solution and backtrack
         choices
     else
         -- check each combination
         case opts of
             o::os ->
-                -- case fit gr o
-                case fitLocation gr o of
-                    Just loc ->
-                        solve' (add gr loc) os (List.append choices [loc])
+                case Grid.fit o gr of
+                    Just fitTr ->
+                        solve' (Grid.update fitTr 1 gr) opts (List.append choices [fitTr])
 
                     Nothing ->
                         solve' gr os choices

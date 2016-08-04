@@ -46,6 +46,6 @@ lright : Triomino
 lright =  ( (0, 0),
             (0, 1), (1, 1) )
 
-map : (Triomino -> Triomino) -> Triomino -> Triomino
+map : (Location -> Location) -> Triomino -> Triomino
 map f (l1, l2, l3) =
     (f l1, f l2, f l3)

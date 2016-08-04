@@ -1,7 +1,7 @@
-module Location
+module Location exposing (..)
 
-type Location = (Int, Int)
+type alias Location = (Int, Int)
 
-map : (Location -> Location) -> Location -> Location
+map : (Int -> Int) -> Location -> Location
 map f (lx, ly) =
     (f lx, f ly)

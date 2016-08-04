@@ -1,4 +1,4 @@
-module Grid
+module Grid exposing (..)
 
 import Triomino exposing (..)
 import Triomino
@@ -14,7 +14,7 @@ grid n m =
 
 filter : (Int -> Bool) -> Grid -> Grid
 filter pred gr =
-    Array.map (Array.filter f) gr
+    Array.map (Array.filter pred) gr
 
 
 length : Grid -> Int
@@ -28,82 +28,119 @@ get (lx, ly) gr =
         Just xs -> Array.get ly xs
         Nothing -> Nothing
 
+set : Location -> Int -> Grid -> Grid
+set (lx, ly) v gr =
+    case Array.get lx gr of
+        Just ys ->
+            case Array.get ly ys of
+                Just _ -> Array.set lx (Array.set ly v ys) gr
+                Nothing -> gr
+        Nothing -> gr
 
--- Check if the grid is full.
 full : Grid -> Bool
 full gr =
-    lenght gr == length <| filter ((==) 1) gr
+    length gr == (length <| filter ((==) 1) gr)
 
 
--- Shift triomino to the location.
 shift : Location -> Triomino -> Triomino
 shift (offx, offy) tr =
     Triomino.map (\ (lx, ly) -> (lx + offx, ly + offy) ) tr
 
-canFit : Grid -> Triomino -> Bool
-canFit gr (x, y, z) =
+
+canFit : Triomino -> Grid ->  Bool
+canFit (x, y, z) gr =
     let
         locav = (\loc ->
                      case get loc gr of
                          Just v -> if v == 0 then True else False
                          Nothing -> False)
     in
-        List.foldr (&&) True <| List.map (locav gr) [x, y, z]
+        List.foldr (&&) True <| List.map locav [x, y, z]
 
 
--- Return the next available position where a triomino pottentially can fit.
-nextAvailable : Grid -> Maybe Location
-nextAvailable gr =
+
+-- Returns a list of all available locations where a triomino can pottentially fit.
+availableLoc : Grid -> List Location
+availableLoc gr =
     let
+        zip = List.map2 (,)
         avPos = (\ (idx, col) ->
                      let
                          collst = Array.toIndexedList col
-                         free = List.filter (\loc -> snd loc == 0) collst
+                         free = List.map fst <| List.filter (\loc -> snd loc == 0) collst
+                         idxs = List.repeat (List.length free) idx
                      in
-                         case List.head free of
-                             Just h -> Just (idx, fst h)
-                             Nothing -> Nothing
+                         zip idxs free
                 )
-        pottentials = List.map avPos <| Array.toIndexedList gr
-        findrec = (\pot ->
-                       case pot of
-                           p::ps ->
-                               case p of
-                                   Just loc -> Just loc
-                                   Nothing -> findrec ps
-                           [] -> Nothing
-                  )
     in
-        findrec pottentials
+        List.concatMap avPos <| Array.toIndexedList gr
 
 
--- Try to fit triomino in the grid
-fit : Grid -> Triomino -> Maybe Grid
-fit gr tr =
-    case nextAvailable gr of
-        Just loc ->
-            let
-                newloc = (shift tr loc)
-            in
-                if canFit gr newloc then
-                    Just (add gr newloc)
-                else
-                    Nothing
+update : Triomino -> Int -> Grid -> Grid
+update (x, y, z) v gr =
+    set z v (set y v (set x v gr))
 
-        Nothing -> Nothing
+-- Try to fit triomino in the grid.
+fit : Triomino -> Grid -> Maybe Triomino
+fit tr gr =
+    let
+        allav = availableLoc gr
+        -- fitrec : List Location -> Maybe Triomino
+        fitrec = (\ avloclst ->
+                      case avloclst of
+                          loc::rstloc ->
+                              let
+                                  shiftedTr = shift loc tr
+                              in
+                                  if canFit shiftedTr gr then
+                                      Just shiftedTr
+                                  else
+                                      fitrec rstloc
+                          [] -> Nothing
+                 )
+    in
+        fitrec allav
+        -- case fitrec allav of
+        --     Just fitTr -> Just <| update fitTr 1 gr
+        --     Nothing -> Nothing
 
 
 -- TODO: remove this function as it's redundant
-fitLocation : Grid -> Triomino -> Maybe Triomino
-fitLocation gr tr =
-    case nextAvailable gr of
-        Just loc ->
-            let
-                newloc = (shift tr loc)
-            in
-                if canFit gr newloc then
-                    Just newloc
-                else
-                    Nothing
+-- fitLocation : Grid -> Triomino -> Maybe Triomino
+-- fitLocation gr tr =
+--     case nextAvailable gr of
+--         Just loc ->
+--             let
+--                 newloc = (shift tr loc)
+--             in
+--                 if canFit gr newloc then
+--                     Just newloc
+--                 else
+--                     Nothing
 
-        Nothing -> Nothing
+--         Nothing -> Nothing
+
+-- Return the next available position where a triomino pottentially can fit.
+-- nextAvailable : Grid -> Maybe Location
+-- nextAvailable gr =
+--      let
+--         avPos = (\ (idx, col) ->
+--                      let
+--                          collst = Array.toIndexedList col
+--                          free = List.filter (\loc -> snd loc == 0) collst
+--                      in
+--                          case List.head free of
+--                              Just h -> Just (idx, fst h)
+--                              Nothing -> Nothing
+--                 )
+--         pottentials = List.map avPos <| Array.toIndexedList gr
+--         findrec = (\pot ->
+--                        case pot of
+--                            p::ps ->
+--                                case p of
+--                                    Just loc -> Just loc
+--                                    Nothing -> findrec ps
+--                            [] -> Nothing
+--                   )
+--     in
+--         findrec pottentials

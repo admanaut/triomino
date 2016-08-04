@@ -1,42 +1,53 @@
 import Html exposing (..)
-import Html.App as Html
-import Triomino exposing (..)
-import Grid exposing (..)
-import View exposing (..)
-import Control exposing (..)
+import Html.App as App
+import Triomino
+import Grid
+import View
+import Control
+import Time exposing (Time, second)
 
 main =
-  Html.beginnerProgram { model = model, view = view, update = update }
+    App.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
 
 -- MODEL
 
 type alias Model =
-    { grid : Grid
-    , solutions : List List Triomino
+    { grid : Grid.Grid
+    , solutions : List Triomino.Triomino
     }
 
-model : Model
-model =
-    { grid = Grid.grid 0 0
-    , solutions = []
-    }
+
+init : (Model, Cmd Msg)
+init =
+    ({grid = Grid.grid 2 9, solutions = []}, Cmd.none)
+
 
 -- UPDATE
 
-type alias Msg = String
+type Msg
+    = Tick Time
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    {model | grid = Control.solve model.grid }
+    case msg of
+        Tick _ ->
+            (model, Cmd.none)
 
+-- SUBSCRIPTIONS
 
---render model =
-    -- generate grid
-    -- generate controls
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Time.every second Tick
 
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
-    View.genGrid model.grid
+    div []
+        [ text (toString model.grid) ]
