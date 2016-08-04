@@ -4,18 +4,23 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Array
 import Grid exposing (..)
+import TriominoColor
+import Color
 
---genGrid : Grid -> Html
 genGrid gr =
     let
+        toColor = (\ i ->
+                       TriominoColor.toString <| TriominoColor.fromInt i)
         tableStyle = []
         collStyle = []
-        cellStyle = [ style [("border", "1px solid"),
-                             ("padding", "10px"),
-                             ("text-alligh", "center")] ]
-
+        cellStyle = (\ c ->
+                         [ style [("border", "1px solid"),
+                                      ("padding", "10px"),
+                                      ("text-alligh", "center"),
+                                      ("background-color", toColor c)] ]
+                         )
         rows = (\r ->
-                    Array.toList ( (Array.map (\c -> td cellStyle [ text (toString c) ]) r) ))
+                    Array.toList ( (Array.map (\c -> td (cellStyle c) [ ]) r) ))
 
         colls = (\g ->
                       Array.toList ( (Array.map (\c -> tr collStyle (rows c)) g) ))

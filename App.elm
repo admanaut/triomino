@@ -36,7 +36,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Tick _ ->
-            (model, Cmd.none)
+            ( {model | grid = Control.solve model.grid }, Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -49,5 +49,6 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ text (toString model.grid) ]
+    View.genGrid model.grid
+    --div []
+    --    [ text (toString model.grid) ]

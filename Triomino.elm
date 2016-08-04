@@ -32,15 +32,15 @@ tleft : Triomino
 tleft = ( (0, 0), (1, 0),
                   (1, 1) )
 
--- A L shaped Triomino
--- *
+-- A J shaped Triomino
+--   *
 -- * *
 lleft : Triomino
 lleft =  (         (1, 0),
            (0, 1), (1, 1) )
 
--- A J shaped Triomino
---   *
+-- A L shaped Triomino
+-- *
 -- * *
 lright : Triomino
 lright =  ( (0, 0),
