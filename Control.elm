@@ -1,10 +1,10 @@
 module Control exposing (..)
 
-import Grid exposing (..)
 import Grid
+import Grid exposing (..)
 import Triomino exposing (..)
-import TriominoColor exposing (..)
 import TriominoColor
+import TriominoColor exposing (..)
 
 type alias Options = List (Triomino, TriominoColor)
 type alias Solutions = List Triomino
@@ -17,28 +17,36 @@ options = [ (straight, Red)
           , (lright, Blue)
           , (lleft, Violet) ]
 
---solve' : Grid -> Options -> List Triomino -> List Triomino
-solve' : Grid -> Options -> List Triomino -> Grid
-solve' gr opts choices =
+solve' : Grid -> Options -> Options -> Maybe Grid
+solve' gr opts allopts =
     if Grid.full gr then
-        -- remember solution and backtrack
-        -- choices
-        gr
+         Just gr
     else
-        -- check each combination
         case opts of
             (o, color)::os ->
                 case Grid.fit o gr of
                     Just fitTr ->
-                        solve' (Grid.update fitTr (TriominoColor.toInt color)  gr) opts (List.append choices [fitTr])
+                         let
+                             val =  TriominoColor.toInt color
+                             newgr = Grid.update fitTr val gr
+                             solved = solve' newgr allopts allopts
+                         in
+                             case solved of
+                                 Just sol ->
+                                     Just sol
+
+                                 Nothing ->
+                                     solve' gr os allopts
 
                     Nothing ->
-                        solve' gr os choices
+                        solve' gr os allopts
 
-            --[] -> choices
-            [] -> gr
+            [] ->
+                Nothing
 
---solve : Grid -> List Triomino
+
 solve : Grid -> Grid
 solve gr =
-    solve' gr options []
+    case solve' gr options options of
+        Just sol -> sol
+        Nothing -> gr

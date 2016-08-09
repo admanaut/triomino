@@ -7,7 +7,6 @@ import Array
 
 type alias Grid = Array.Array (Array.Array Int)
 
--- Returns a Grid of n*m elements initialised with 0.
 grid : Int -> Int -> Grid
 grid n m =
     Array.repeat n (Array.repeat m 0)
@@ -39,12 +38,12 @@ set (lx, ly) v gr =
 
 full : Grid -> Bool
 full gr =
-    length gr == (length <| filter ((==) 1) gr)
+     length gr == (length <| filter ((<) 0) gr)
 
-
+-- rename it to translate
 shift : Location -> Triomino -> Triomino
-shift (offx, offy) tr =
-    Triomino.map (\ (lx, ly) -> (lx + offx, ly + offy) ) tr
+shift (offx, offy) ((xx, xy), (yx, yy), (zx, zy)  ) =
+    ( (offx, offy), (offx + yx, yy - xy + offy), (offx + zx, zy - xy + offy)  )
 
 
 canFit : Triomino -> Grid ->  Bool
@@ -100,47 +99,3 @@ fit tr gr =
                  )
     in
         fitrec allav
-        -- case fitrec allav of
-        --     Just fitTr -> Just <| update fitTr 1 gr
-        --     Nothing -> Nothing
-
-
--- TODO: remove this function as it's redundant
--- fitLocation : Grid -> Triomino -> Maybe Triomino
--- fitLocation gr tr =
---     case nextAvailable gr of
---         Just loc ->
---             let
---                 newloc = (shift tr loc)
---             in
---                 if canFit gr newloc then
---                     Just newloc
---                 else
---                     Nothing
-
---         Nothing -> Nothing
-
--- Return the next available position where a triomino pottentially can fit.
--- nextAvailable : Grid -> Maybe Location
--- nextAvailable gr =
---      let
---         avPos = (\ (idx, col) ->
---                      let
---                          collst = Array.toIndexedList col
---                          free = List.filter (\loc -> snd loc == 0) collst
---                      in
---                          case List.head free of
---                              Just h -> Just (idx, fst h)
---                              Nothing -> Nothing
---                 )
---         pottentials = List.map avPos <| Array.toIndexedList gr
---         findrec = (\pot ->
---                        case pot of
---                            p::ps ->
---                                case p of
---                                    Just loc -> Just loc
---                                    Nothing -> findrec ps
---                            [] -> Nothing
---                   )
---     in
---         findrec pottentials

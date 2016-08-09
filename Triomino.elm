@@ -22,8 +22,7 @@ line = ( (0, 0), (1, 0), (2, 0) )
 -- * *
 -- *
 tright : Triomino
-tright = ( (0, 0), (1, 0),
-           (0, 1) )
+tright = ( (0, 0), (0, 1), (1, 0) )
 
 -- A half-left T shaped Triomino
 -- * *
@@ -36,8 +35,7 @@ tleft = ( (0, 0), (1, 0),
 --   *
 -- * *
 lleft : Triomino
-lleft =  (         (1, 0),
-           (0, 1), (1, 1) )
+lleft =  ( (0, 1), (1, 0),  (1, 1) )
 
 -- A L shaped Triomino
 -- *

@@ -5,6 +5,8 @@ import Grid
 import View
 import Control
 import Time exposing (Time, second)
+import Debug
+import Array
 
 main =
     App.program
@@ -18,14 +20,22 @@ main =
 
 type alias Model =
     { grid : Grid.Grid
-    , solutions : List Triomino.Triomino
+    , solutions : List Grid.Grid
     }
 
 
 init : (Model, Cmd Msg)
 init =
-    ({grid = Grid.grid 2 9, solutions = []}, Cmd.none)
+    let
+        gr = Grid.grid 2 9
+        sols = [Control.solve gr]
+    in
+        case sols of
+            s::ss ->
+                ({grid = s, solutions = ss}, Cmd.none)
 
+            [] ->
+                ({grid = gr, solutions = []}, Cmd.none)
 
 -- UPDATE
 
@@ -36,7 +46,12 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Tick _ ->
-            ( {model | grid = Control.solve model.grid }, Cmd.none)
+            case model.solutions of
+                s::ss ->
+                    ( {grid = s, solutions = ss }, Cmd.none)
+
+                [] ->
+                    init
 
 -- SUBSCRIPTIONS
 
